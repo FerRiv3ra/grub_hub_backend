@@ -3,7 +3,7 @@ const { check } = require('express-validator');
 
 const { getUsers, postUsers, putUsers, deleteUsers } = require('../controllers/users');
 const { validRole, validUser } = require('../helpers/db-validators');
-const { validateFields } = require('../middlewares/validate-fields');
+const { validateFields, validateJWT, isAdminRole } = require('../middlewares');
 
 const router = Router();
 
@@ -13,7 +13,6 @@ router.post('/', [
     check('name', 'The name cannot be empty').not().isEmpty(),
     check('password', 'Min password is 6 chars').isLength({min: 6}),
     check('postcode', 'Is not valid postcode').isPostalCode('GB'),
-    // check('role', 'Is not valid role').isIn(['ADMIN_ROLE', 'USER_ROLE']),
     check('role').custom( validRole ),
     validateFields
 ] , postUsers);
@@ -26,6 +25,8 @@ router.put('/:id', [
 ] , putUsers);
 
 router.delete('/:id', [
+    validateJWT,
+    isAdminRole,
     check('id', 'Is not a valid ID').isMongoId(),
     check('id').custom( validUser ),
     validateFields

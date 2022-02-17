@@ -1,5 +1,6 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
+
 const User = require('../models/user');
 
 const getUsers = async (req, res = response) => {
@@ -22,12 +23,20 @@ const getUsers = async (req, res = response) => {
 }
 
 const postUsers = async (req, res = response) => {
-    const { name, password, noPeople = 1, address, postcode, role = 'USER_ROLE' } = req.body;
+    const { name,
+        email, 
+        phone, 
+        password, 
+        noPeople = 1, 
+        address, 
+        postcode, 
+        role = 'USER_ROLE' } = req.body;
+
     let customer_id = await User.countDocuments();
     customer_id += 1;
 
     const user = new User({
-        name, password, noPeople, address, postcode, role, customer_id
+        name, password, noPeople, address, postcode, role, customer_id, email, phone
     });
 
     const salt = bcrypt.genSaltSync();
