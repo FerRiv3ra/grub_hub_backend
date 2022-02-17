@@ -1,27 +1,63 @@
 const { response } = require('express');
+const bcrypt = require('bcryptjs');
+const User = require('../models/user');
 
-const getUsers = (req, res = response) => {
+const getUsers = async (req, res = response) => {
+    const { limit = 5, from = 0 } = req.query;
+    if(Number(limit) === isNaN) limit = 5;
+    if(Number(from) === isNaN) from = 0;
+    const query = {state: true};
+
+    const [total, users] = await Promise.all([
+        User.countDocuments(query),
+        User.find(query)
+            .skip(Number(from))
+            .limit(Number(limit))
+    ]);
+
     res.json({
-        msg: 'GET API - Controller'
+        total,
+        users
     });
 }
 
-const postUsers = (req, res = response) => {
-    res.json({
-        msg: 'POST API - Controller'
+const postUsers = async (req, res = response) => {
+    const { name, password, noPeople = 1, address, postcode, role = 'USER_ROLE' } = req.body;
+    let customer_id = await User.countDocuments();
+    customer_id += 1;
+
+    const user = new User({
+        name, password, noPeople, address, postcode, role, customer_id
     });
+
+    const salt = bcrypt.genSaltSync();
+    user.password = bcrypt.hashSync(password, salt);
+    
+    await user.save();
+
+    res.json(user);
 }
 
-const putUsers = (req, res = response) => {
-    res.json({
-        msg: 'PUT API - Controller'
-    });
+const putUsers = async (req, res = response) => {
+    const { id } = req.params;
+    const { _id, password, ...body } = req.body;
+
+    if( password ){
+        const salt = bcrypt.genSaltSync();
+        body.password = bcrypt.hashSync(password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate( id, body );
+
+    res.json(user);
 }
 
-const deleteUsers = (req, res = response) => {
-    res.json({
-        msg: 'DELETE API'
-    });
+const deleteUsers = async (req, res = response) => {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndUpdate(id, {state: false});
+
+    res.json(user);
 }
 
 module.exports = {
