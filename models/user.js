@@ -13,6 +13,10 @@ const UserSchema = Schema({
         type: Number,
         required: [true, 'Number of people is required']
     },
+    dob: {
+        type: String,
+        required: [true, 'Date of birth is required']
+    },
     child: {
         type: Boolean,
         default: false

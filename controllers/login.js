@@ -45,6 +45,43 @@ const login = async (req, res = response) => {
     }
 }
 
+const loginUser = async (req, res = response) => {
+    const { customer_id, dob } = req.body;
+
+    try {
+        const user = await User.findOne({customer_id});
+
+        if(!user){
+            return res.status(400).json({
+                msg: 'Customer ID o date of birth no valid'
+            });
+        }
+
+        //Verify user state
+        if(!user.state){
+            return res.status(400).json({
+                msg: 'Customer ID o date of birth no valid'
+            });
+        }
+
+        if(user.dob !== dob){
+            return res.status(400).json({
+                msg: 'Customer ID o date of birth no valid'
+            });
+        }
+
+        res.json({
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: 'Talk to the administrator'
+        });
+    }
+}
+
 module.exports = {
-    login
+    login,
+    loginUser
 };

@@ -29,14 +29,19 @@ const postUsers = async (req, res = response) => {
         password, 
         noPeople = 1, 
         address, 
-        postcode, 
+        postcode,
+        dob, 
         role = 'USER_ROLE' } = req.body;
 
-    let customer_id = await User.countDocuments();
-    customer_id += 1;
+    let customer_id = await User.countDocuments({role: 'USER_ROLE'});
+    if(role === 'ADMIN_ROLE'){
+        customer_id = 0;
+    }else{
+        customer_id += 1;
+    }
 
     const user = new User({
-        name, password, noPeople, address, postcode, role, customer_id, email, phone
+        name, password, noPeople, address, postcode, role, customer_id, email, phone, dob
     });
 
     const salt = bcrypt.genSaltSync();

@@ -13,6 +13,8 @@ router.post('/', [
     check('name', 'The name cannot be empty').not().isEmpty(),
     check('password', 'Min password is 6 chars').isLength({min: 6}),
     check('postcode', 'Is not valid postcode').isPostalCode('GB'),
+    check('dob', 'Date of birth is required').not().isEmpty(),
+    check('dob', 'Date of birth is not valid').isDate({format: 'DD-MM-YYYY'}),
     check('role').custom( validRole ),
     validateFields
 ] , postUsers);
