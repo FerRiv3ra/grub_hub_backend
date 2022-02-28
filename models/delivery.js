@@ -17,6 +17,10 @@ const DeliverySchema = Schema({
         type: Boolean,
         default: true
     },
+    startDate: {
+        type: String,
+        required: true
+    },
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',

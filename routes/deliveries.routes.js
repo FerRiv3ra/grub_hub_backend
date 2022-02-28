@@ -1,19 +1,20 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { createDelivery } = require('../controllers/deliveries');
+const { createDelivery, getAllDeliveries, getDelivery, putDelivery, deleteDelivery } = require('../controllers/deliveries');
+const { validDelivery } = require('../helpers/db-validators');
 const { validateJWT, validateFields } = require('../middlewares');
 
 const router = Router();
 
 //GET all deliveries
-router.get('/', (req, res) => {
-    res.json({msg: 'OK'});
-});
+router.get('/', getAllDeliveries);
 
 //GET one delivery
-router.get('/:id', (req, res) => {
-    res.json({msg: 'OK'});
-});
+router.get('/:id', [
+    check('id', 'ID no valid').isMongoId(),
+    check('id').custom(validDelivery),
+    validateFields
+], getDelivery);
 
 //Create delivery
 router.post('/', [
@@ -26,13 +27,18 @@ router.post('/', [
 ], createDelivery);
 
 // Edit delivery
-router.put('/:id', (req, res) => {
-    res.json({msg: 'OK'});
-});
+router.put('/:id',[
+    validateJWT,
+    check('id', 'Is not valid ID').isMongoId(),
+    check('id').custom(validDelivery),
+    validateFields
+], putDelivery);
 
 // Delete delivery
-router.delete('/:id', (req, res) => {
-    res.json({msg: 'OK'});
-});
+router.delete('/:id', [
+    check('id', 'Is not valid ID').isMongoId(),
+    check('id').custom(validDelivery),
+    validateFields
+], deleteDelivery);
 
 module.exports = router;
