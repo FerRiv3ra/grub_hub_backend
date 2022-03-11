@@ -1,13 +1,19 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { getUsers, postUsers, putUsers, deleteUsers } = require('../controllers/users');
+const { getUsers, postUsers, putUsers, deleteUsers, getUser } = require('../controllers/users');
 const { validRole, validUser } = require('../helpers/db-validators');
 const { validateFields, validateJWT, isAdminRole } = require('../middlewares');
 
 const router = Router();
 
 router.get('/', getUsers);
+
+router.get('/:id',[
+    check('id', 'Is not a valid ID').isMongoId(),
+    check('id').custom( validUser ),
+    validateFields
+], getUser);
 
 router.post('/', [
     check('name', 'The name cannot be empty').not().isEmpty(),

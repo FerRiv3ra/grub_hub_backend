@@ -22,6 +22,14 @@ const getUsers = async (req, res = response) => {
     });
 }
 
+const getUser = async (req, res = response) => {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+
+    res.json(user);
+}
+
 const postUsers = async (req, res = response) => {
     const { name,
         email, 
@@ -76,6 +84,7 @@ const deleteUsers = async (req, res = response) => {
 
 module.exports = {
     getUsers,
+    getUser,
     postUsers,
     putUsers,
     deleteUsers
