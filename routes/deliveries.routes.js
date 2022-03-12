@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { createDelivery, getAllDeliveries, getDelivery, putDelivery, deleteDelivery } = require('../controllers/deliveries');
+const { createDelivery, getAllDeliveries, putDelivery, deleteDelivery, getDelivery } = require('../controllers/deliveries');
 const { validDelivery } = require('../helpers/db-validators');
 const { validateJWT, validateFields } = require('../middlewares');
 
@@ -9,10 +9,9 @@ const router = Router();
 //GET all deliveries
 router.get('/', getAllDeliveries);
 
-//GET one delivery
+//GET delivery by user ID
 router.get('/:id', [
-    check('id', 'ID no valid').isMongoId(),
-    check('id').custom(validDelivery),
+    check('id', 'ID is required').not().isEmpty(),
     validateFields
 ], getDelivery);
 

@@ -73,10 +73,19 @@ const getAllDeliveries = async (req, res = response) => {
 
 const getDelivery = async (req, res = response) => {
     const { id } = req.params;
+    const startDate = initialDate();
 
-    const delivery = await Delivery.find({_id: id});
+    const delivery = await Delivery.find({customer_id: id, startDate});
 
-    res.json(delivery);
+    if(delivery.length !== 0){
+        return res.status(401).json({
+            error: 'This customer ID is alredy used this week'
+        });
+    }
+
+    res.status(200).json({
+        msg: 'OK'
+    });
 }
 
 const putDelivery = async (req, res = response) => {
