@@ -32,7 +32,6 @@ const getUser = async (req, res = response) => {
 
 const postUsers = async (req, res = response) => {
     const { name,
-        email, 
         phone, 
         password, 
         noPeople = 1, 
@@ -40,12 +39,18 @@ const postUsers = async (req, res = response) => {
         postcode,
         dob, 
         role = 'USER_ROLE' } = req.body;
+    
+    let email = req.body;
 
     let customer_id = await User.countDocuments({role: 'USER_ROLE'});
     if(role === 'ADMIN_ROLE'){
         customer_id = 0;
     }else{
         customer_id += 1;
+    }
+
+    if(email === ''){
+        email = `noemail${customer_id}@default.com`;
     }
 
     const user = new User({
