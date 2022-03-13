@@ -40,7 +40,7 @@ const postUsers = async (req, res = response) => {
         dob, 
         role = 'USER_ROLE' } = req.body;
     
-    let email = req.body;
+    let {email} = req.body;
 
     let customer_id = await User.countDocuments({role: 'USER_ROLE'});
     if(role === 'ADMIN_ROLE'){
