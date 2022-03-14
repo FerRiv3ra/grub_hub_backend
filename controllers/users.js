@@ -36,6 +36,7 @@ const postUsers = async (req, res = response) => {
         password, 
         noPeople = 1, 
         address, 
+        child,
         postcode,
         dob, 
         role = 'USER_ROLE' } = req.body;
@@ -54,7 +55,7 @@ const postUsers = async (req, res = response) => {
     }
 
     const user = new User({
-        name, password, noPeople, address, postcode, role, customer_id, email, phone, dob
+        name, password, noPeople, child, address, postcode, role, customer_id, email, phone, dob
     });
 
     const salt = bcrypt.genSaltSync();
