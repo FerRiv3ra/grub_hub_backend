@@ -31,17 +31,21 @@ const getUser = async (req, res = response) => {
 }
 
 const postUsers = async (req, res = response) => {
-    const { name,
-        phone, 
-        password, 
-        noPeople = 1, 
-        address, 
+    const { 
         child,
+        child_cant = 0,
+        dob,
+        last = '', 
+        name,
+        noPeople = 1, 
+        password, 
+        phone, 
         postcode,
-        dob, 
-        role = 'USER_ROLE' } = req.body;
+        role = 'USER_ROLE', 
+        visits = 0, 
+    } = req.body;
     
-    let {email} = req.body;
+    let {email = ''} = req.body;
 
     let customer_id = await User.countDocuments({role: 'USER_ROLE'});
     if(role === 'ADMIN_ROLE'){
@@ -55,7 +59,7 @@ const postUsers = async (req, res = response) => {
     }
 
     const user = new User({
-        name, password, noPeople, child, address, postcode, role, customer_id, email, phone, dob
+        name, child_cant, password, noPeople, last, child, postcode, role, customer_id, email, phone, dob, visits
     });
 
     const salt = bcrypt.genSaltSync();

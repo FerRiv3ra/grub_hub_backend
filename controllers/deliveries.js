@@ -1,9 +1,10 @@
 const { response } = require('express');
 const { initialDate, converToDate } = require('../helpers/get-dates');
 const Delivery = require('../models/delivery');
+const User = require('../models/user');
 
 const createDelivery = async (req, res = response) => {
-    const { amount, customer_id } = req.body;
+    const { amount, customer_id, uid } = req.body;
 
     const date = Date.now();
 
@@ -24,6 +25,13 @@ const createDelivery = async (req, res = response) => {
             msg: 'This customer ID is alredy used this week'
         });
     }
+
+    const user = await User.findById(uid);
+    const { visits } = user;
+    let [a, m, d] = new Date().toISOString().slice(0, 10).split('-');
+    last = `${d}/${m}/${a}`;
+
+    await User.findByIdAndUpdate(uid, { visits: visits + 1, last})
 
     const delivery = new Delivery(data);
 

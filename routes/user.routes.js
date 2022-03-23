@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 
 const { getUsers, postUsers, putUsers, deleteUsers, getUser } = require('../controllers/users');
-const { validRole, validUser } = require('../helpers/db-validators');
+const { validRole, validUser, validEmail } = require('../helpers/db-validators');
 const { validateFields, validateJWT, isAdminRole } = require('../middlewares');
 
 const router = Router();
@@ -22,6 +22,7 @@ router.post('/', [
     check('dob', 'Date of birth is required').not().isEmpty(),
     check('dob', 'Date of birth is not valid').isDate({format: 'DD-MM-YYYY'}),
     check('role').custom( validRole ),
+    check('email').custom( validEmail ),
     validateFields
 ] , postUsers);
 

@@ -9,6 +9,15 @@ const validRole = async (role = '') => {
     } 
 }
 
+const validEmail = async (email = '') => {
+    if(email !== ''){
+        const emailExists = await User.findOne({email});
+        if( emailExists ){
+            throw new Error(`${email} already registered`);
+        } 
+    }
+}
+
 const validUser = async (id) => {
     const existUser = await User.findById(id);
     if( !existUser || !existUser.state ){
@@ -26,5 +35,6 @@ const validDelivery = async (id) => {
 module.exports = {
     validRole,
     validUser,
-    validDelivery
+    validDelivery,
+    validEmail
 }

@@ -1,52 +1,60 @@
 const { Schema, model } = require('mongoose');
 
 const UserSchema = Schema({
-    name: {
-        type: String,
-        required: [true, 'The name is required']
+    child: {
+        type: Boolean,
+        default: false
     },
-    password: {
-        type: String,
-        required: [true, 'The password is required']
-    },
-    noPeople: {
+    child_cant: {
         type: Number,
-        required: [true, 'Number of people is required']
+        default: 0
+    },
+    customer_id: {
+        type: Number
     },
     dob: {
         type: String,
         required: [true, 'Date of birth is required']
     },
-    child: {
-        type: Boolean,
-        default: false
-    },
-    address: {
+    email: {
         type: String,
-        required: [true, 'The address is required']
+        unique: true
+    },
+    last: {
+        type: String,
+    },
+    name: {
+        type: String,
+        required: [true, 'The name is required']
+    },
+    noPeople: {
+        type: Number,
+        default: 1,
+    },
+    password: {
+        type: String,
+        required: [true, 'The password is required']
+    },
+    phone: {
+        type: String
     },
     postcode: {
         type: String,
         required: [true, 'The postcode is required']
-    },
-    email: {
-        type: String
-    },
-    phone: {
-        type: String
     },
     role: {
         type: String,
         required: true,
         enum: ['ADMIN_ROLE', 'USER_ROLE']
     },
-    customer_id: {
-        type: Number
-    },
     state: {
         type: Boolean,
         default: true
     },
+    visits: {
+        type: Number,
+        default: 0
+    }
 });
 
 UserSchema.methods.toJSON = function() {
