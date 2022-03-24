@@ -27,6 +27,19 @@ const getUser = async (req, res = response) => {
 
     const user = await User.findById(id);
 
+    let toiletries;
+    if(new Date().getMonth() !== user.month){
+        if(user.single){
+            toiletries = 3;
+        }else{
+            toiletries = 6;
+        }
+        const userE = await User.findByIdAndUpdate(id, {toiletries, month: new Date().getMonth()}, {
+            returnOriginal: false
+        })
+        return res.json(userE);
+    }
+
     res.json(user);
 }
 

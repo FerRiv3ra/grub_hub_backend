@@ -27,22 +27,13 @@ const createDelivery = async (req, res = response) => {
     }
 
     const user = await User.findById(uid);
-    let { visits, month, toiletries, single } = user;
+    let { visits, toiletries } = user;
     let [a, m, d] = new Date().toISOString().slice(0, 10).split('-');
     last = `${d}/${m}/${a}`;
 
-    if(new Date().getMonth() !== month){
-        if(single){
-            toiletries = 3;
-        }else{
-            toiletries = 6;
-        }
-        month = new Date().getMonth();
-    }else{
-        toiletries = toiletries - cant_toiletries
-    }
+    toiletries = toiletries - cant_toiletries
 
-    await User.findByIdAndUpdate(uid, { visits: visits + 1, last, toiletries, month})
+    await User.findByIdAndUpdate(uid, { visits: visits + 1, last, toiletries})
 
     const delivery = new Delivery(data);
 
