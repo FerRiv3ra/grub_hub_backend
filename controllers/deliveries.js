@@ -4,7 +4,7 @@ const Delivery = require('../models/delivery');
 const User = require('../models/user');
 
 const createDelivery = async (req, res = response) => {
-    const { amount, customer_id, uid } = req.body;
+    const { amount, customer_id, uid, cant_toiletries } = req.body;
 
     const date = Date.now();
 
@@ -27,11 +27,22 @@ const createDelivery = async (req, res = response) => {
     }
 
     const user = await User.findById(uid);
-    const { visits } = user;
+    let { visits, month, toiletries, single } = user;
     let [a, m, d] = new Date().toISOString().slice(0, 10).split('-');
     last = `${d}/${m}/${a}`;
 
-    await User.findByIdAndUpdate(uid, { visits: visits + 1, last})
+    if(new Date().getMonth() !== month){
+        if(single){
+            toiletries = 3;
+        }else{
+            toiletries = 6;
+        }
+        month = new Date().getMonth();
+    }else{
+        toiletries = toiletries - cant_toiletries
+    }
+
+    await User.findByIdAndUpdate(uid, { visits: visits + 1, last, toiletries, month})
 
     const delivery = new Delivery(data);
 

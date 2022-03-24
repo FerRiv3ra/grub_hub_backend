@@ -23,13 +23,13 @@ const UserSchema = Schema({
     last: {
         type: String,
     },
+    month: {
+        type: Number,
+        default: new Date().getMonth()
+    },
     name: {
         type: String,
         required: [true, 'The name is required']
-    },
-    noPeople: {
-        type: Number,
-        default: 1,
     },
     password: {
         type: String,
@@ -50,6 +50,14 @@ const UserSchema = Schema({
     state: {
         type: Boolean,
         default: true
+    },
+    single: {
+        type: Boolean,
+        default: true,
+    },
+    toiletries: {
+        type: Number,
+        default: 3
     },
     visits: {
         type: Number,
