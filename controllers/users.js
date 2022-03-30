@@ -27,19 +27,6 @@ const getUser = async (req, res = response) => {
 
     const user = await User.findById(id);
 
-    let toiletries;
-    if(new Date().getMonth() !== user.month){
-        if(user.single){
-            toiletries = 3;
-        }else{
-            toiletries = 6;
-        }
-        const userE = await User.findByIdAndUpdate(id, {toiletries, month: new Date().getMonth()}, {
-            returnOriginal: false
-        })
-        return res.json(userE);
-    }
-
     res.json(user);
 }
 
@@ -49,8 +36,9 @@ const postUsers = async (req, res = response) => {
         dob,
         last = '',
         name,
-        single = true, 
+        no_household = 1, 
         password,
+        housing_provider = '',
         phone, 
         postcode,
         role = 'USER_ROLE', 
@@ -70,7 +58,7 @@ const postUsers = async (req, res = response) => {
         email = `noemail${customer_id}@default.com`;
     }
 
-    if(!single){
+    if(no_household - child_cant > 1){
         toiletries = 6;
     }
 
@@ -83,14 +71,15 @@ const postUsers = async (req, res = response) => {
         child, 
         child_cant, 
         dob, 
-        email, 
+        email,
+        housing_provider, 
         name, 
         last, 
         password, 
         phone, 
-        postcode, 
+        postcode: postcode.toUpperCase(), 
         role, 
-        single, 
+        no_household, 
         toiletries, 
         visits
     });

@@ -1,6 +1,10 @@
 const { Schema, model } = require('mongoose');
 
 const UserSchema = Schema({
+    blocked: {
+        type: Boolean,
+        default: false
+    },
     child: {
         type: Boolean,
         default: false
@@ -20,16 +24,19 @@ const UserSchema = Schema({
         type: String,
         unique: true
     },
-    last: {
+    housing_provider: {
         type: String,
     },
-    month: {
-        type: Number,
-        default: new Date().getMonth()
+    last: {
+        type: String,
     },
     name: {
         type: String,
         required: [true, 'The name is required']
+    },
+    no_household: {
+        type: Number,
+        default: 1,
     },
     password: {
         type: String,
@@ -45,15 +52,11 @@ const UserSchema = Schema({
     role: {
         type: String,
         required: true,
-        enum: ['ADMIN_ROLE', 'USER_ROLE']
+        enum: ['ADMIN_ROLE', 'USER_ROLE', 'VOLUNTEER']
     },
     state: {
         type: Boolean,
         default: true
-    },
-    single: {
-        type: Boolean,
-        default: true,
     },
     toiletries: {
         type: Number,
