@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { createDelivery, getAllDeliveries, putDelivery, deleteDelivery, getDelivery } = require('../controllers/deliveries');
+const { createDelivery, getAllDeliveries, putDelivery, deleteDelivery, getDelivery, sendEmail } = require('../controllers/deliveries');
 const { validDelivery } = require('../helpers/db-validators');
 const { validateJWT, validateFields } = require('../middlewares');
 
@@ -8,6 +8,11 @@ const router = Router();
 
 //GET all deliveries
 router.get('/', getAllDeliveries);
+
+router.post('/email',[
+    validateJWT,
+    validateFields
+], sendEmail);
 
 //GET delivery by user ID
 router.get('/:id', [

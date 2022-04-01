@@ -1,4 +1,5 @@
 const { response } = require('express');
+const createPDF = require('../helpers/createPDF');
 const { initialDate, converToDate } = require('../helpers/get-dates');
 const Delivery = require('../models/delivery');
 const User = require('../models/user');
@@ -55,7 +56,7 @@ const getAllDeliveries = async (req, res = response) => {
   const {
     startDate = '01/01/2022',
     finalDate = today
-  } = req.query;
+  } = req.body;
   let final;
 
   const start = converToDate(startDate);
@@ -89,6 +90,69 @@ const getAllDeliveries = async (req, res = response) => {
   }
 
   res.json({ deliveries })
+}
+
+const sendEmail = async (req, res = response) => {
+  const today = new Date();
+  const {
+    startDate = '01/01/2022',
+    finalDate = today,
+  } = req.query;
+  let final;
+
+  const start = converToDate(startDate);
+  if (typeof (finalDate) === 'string') {
+    final = converToDate(finalDate, 'final');
+  } else {
+    final = finalDate;
+  }
+
+  if (start > today || start > final) {
+    return res.status(400).json({
+      msg: 'The dates are not valid'
+    });
+  }
+
+  if (final > today) {
+    final = today;
+  }
+
+  const data = await Delivery.find({
+    $and: [
+      { date: { $gte: new Date(start), $lte: new Date(final) } },
+      { state: true }
+    ]
+  });
+
+  if (!data) {
+    return res.status(204).json({
+      msg: 'Nothing to show'
+    })
+  }
+
+  const users = await User.find();
+
+  const visits = data.length;
+
+  const usersData = new Set(data.map((del) => {
+    for (const user of users) {
+      if (user.customer_id === del.customer_id) {
+        return user
+      }
+    }
+  }));
+
+  const usersArr = [...usersData];
+
+  const email = req.user.email;
+
+  const totalHousehold = usersArr.reduce((tot, item) => {
+    return tot + item.no_household;
+  }, 0);
+
+  const response = await createPDF(start, final, usersArr, visits, totalHousehold, email);
+
+  res.json({msg: response})
 }
 
 const getDelivery = async (req, res = response) => {
@@ -130,5 +194,6 @@ module.exports = {
   getAllDeliveries,
   getDelivery,
   putDelivery,
-  deleteDelivery
+  deleteDelivery,
+  sendEmail
 }
