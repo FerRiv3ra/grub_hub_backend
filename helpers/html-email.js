@@ -9,7 +9,7 @@ const emailHTML = `
       display: block;
       width: 200px;
     " />
-    <h2>This is an automated message from the server, please don't reply.</h2>
+    <h3>This is an automated message from the server, please don't reply.</h3>
     <h4>Attached is the report.</h4>
     <div style="
   height: 80px;
