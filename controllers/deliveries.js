@@ -1,8 +1,12 @@
+const {unlinkSync} = require('fs');
 const { response } = require('express');
 const createPDF = require('../helpers/createPDF');
+const nodemailer = require('nodemailer');
+
 const { initialDate, converToDate } = require('../helpers/get-dates');
 const Delivery = require('../models/delivery');
 const User = require('../models/user');
+const emailHTML = require('../helpers/html-email');
 
 const createDelivery = async (req, res = response) => {
   const { amount, customer_id, uid, cant_toiletries } = req.body;
@@ -97,7 +101,7 @@ const sendEmail = async (req, res = response) => {
   const {
     startDate = '01/01/2022',
     finalDate = today,
-  } = req.query;
+  } = req.body;
   let final;
 
   const start = converToDate(startDate);
@@ -150,9 +154,40 @@ const sendEmail = async (req, res = response) => {
     return tot + item.no_household;
   }, 0);
 
-  const response = await createPDF(start, final, usersArr, visits, totalHousehold, email);
+  const response = await createPDF(start, final, usersArr, visits, totalHousehold);
 
-  res.json({msg: response})
+  if(response.msg === 'OK'){
+    try {
+      const transport = nodemailer.createTransport({
+        host: process.env.HOST_EMAIL,
+        port: process.env.PORT_EMAIL,
+        auth: {
+          user: process.env.USER_EMAIL,
+          pass: process.env.PASS_EMAIL
+        }
+      });
+  
+      await transport.sendMail({
+        from: '"No-Reply" <no-reply@thevinecentre.org>',
+        to: email,
+        subject: `Report ${start.toISOString().slice(0, 10)} - ${final.toISOString().slice(0, 10)}`, // Subject line
+        html: emailHTML,
+        attachments: [{
+          filename: `report${final.toISOString().slice(0, 10)}.pdf`,
+          path: `./PDFs/report${final.toISOString().slice(0, 10)}.pdf`,
+          contentType: 'application/pdf'
+        }]
+      });
+  
+      unlinkSync(`./PDFs/report${final.toISOString().slice(0, 10)}.pdf`);
+      
+      return res.json({msg: `Email sent to ${email}`});
+    } catch (error) {
+      return res.status(400).json({error: 'Invalid email'});
+    }
+  }else{
+    return res.status(408).json(response);
+  }
 }
 
 const getDelivery = async (req, res = response) => {

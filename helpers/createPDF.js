@@ -1,7 +1,7 @@
 const PDF = require('pdfkit-construct');
 const fs = require('fs');
 
-const createPDF = (start, final, usersArr = [], visits, totalHousehold, email) => {
+const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
   return new Promise((res, rej) => {
     try {
       const users = usersArr.map((user, index) => {
@@ -91,12 +91,12 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold, email) =
     
       doc.render();
     
-      doc.pipe(fs.createWriteStream(`./PDFs/${email}.pdf`));
+      doc.pipe(fs.createWriteStream(`./PDFs/report${final.toISOString().slice(0, 10)}.pdf`));
       doc.end();
 
-      res(`Report sent to ${email}`);
+      res({msg: `OK`});
     } catch (error) {
-      rej('Cannot create report')
+      rej({error: 'Cannot create report'})
     }
   })
 }
