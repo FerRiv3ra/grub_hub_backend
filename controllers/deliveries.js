@@ -93,7 +93,24 @@ const getAllDeliveries = async (req, res = response) => {
     })
   }
 
-  res.json({ deliveries })
+  const users = await User.find();
+
+  const usersData = deliveries.map((del) => {
+    for (const user of users) {
+      if (user.customer_id === del.customer_id) {
+        user.visits = 0;
+        return user
+      }
+    }
+  });
+
+  const usersArr = usersData.reduce((temp, user) => {
+    temp[user.customer_id] = user;
+    temp[user.customer_id].visits += 1;
+    return temp;
+  }, []).filter((temp) => temp !== null);
+
+  res.json({ deliveries, usersArr })
 }
 
 const sendEmail = async (req, res = response) => {
@@ -138,15 +155,20 @@ const sendEmail = async (req, res = response) => {
 
   const visits = data.length;
 
-  const usersData = new Set(data.map((del) => {
+  const usersData = data.map((del) => {
     for (const user of users) {
       if (user.customer_id === del.customer_id) {
+        user.visits = 0;
         return user
       }
     }
-  }));
+  });
 
-  const usersArr = [...usersData];
+  const usersArr = usersData.reduce((temp, user) => {
+    temp[user.customer_id] = user;
+    temp[user.customer_id].visits += 1;
+    return temp;
+  }, []).filter((temp) => temp !== null);
 
   const email = req.user.email;
 
@@ -168,7 +190,7 @@ const sendEmail = async (req, res = response) => {
       });
   
       await transport.sendMail({
-        from: '"No-Reply" <no-reply@thevinecentre.org>',
+        from: '"No-Reply The Vine Centre" <no-reply@thevinecentre.org>',
         to: email,
         subject: `Report ${start.toISOString().slice(0, 10)} - ${final.toISOString().slice(0, 10)}`, // Subject line
         html: emailHTML,
