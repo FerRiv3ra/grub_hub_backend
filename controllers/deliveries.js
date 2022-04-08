@@ -60,7 +60,7 @@ const getAllDeliveries = async (req, res = response) => {
   const {
     startDate = '01/01/2022',
     finalDate = today
-  } = req.body;
+  } = req.params;
   let final;
 
   const start = converToDate(startDate);
