@@ -18,7 +18,7 @@ const getUsers = async (req, res = response) => {
 
     res.json({
         total,
-        users
+        users: users.reverse()
     });
 }
 
