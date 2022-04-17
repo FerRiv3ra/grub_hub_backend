@@ -5,21 +5,24 @@ const User = require('../models/user');
 const { generateJWT } = require('../helpers/generate-jwt');
 
 const login = async (req, res = response) => {
-    const {email, password} = req.body;
+    const {password} = req.body;
+    let {email} = req.body;
+
+    email = email.toLowerCase();
 
     try {
         //Verify if user exists
         const user = await User.findOne({email});
         if(!user){
             return res.status(400).json({
-                msg: 'User o password no valid'
+                msg: 'User does not exist'
             });
         }
 
         //Verify user state
         if(!user.state){
             return res.status(400).json({
-                msg: 'User o password no valid'
+                msg: 'User does not exist'
             });
         }
 
@@ -53,14 +56,14 @@ const loginUser = async (req, res = response) => {
 
         if(!user){
             return res.status(400).json({
-                msg: 'Customer ID o date of birth no valid'
+                msg: 'User does not exist'
             });
         }
 
         //Verify user state
         if(!user.state){
             return res.status(400).json({
-                msg: 'Customer ID o date of birth no valid'
+                msg: 'User does not exist'
             });
         }
 

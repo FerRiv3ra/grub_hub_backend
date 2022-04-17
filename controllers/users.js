@@ -71,7 +71,7 @@ const postUsers = async (req, res = response) => {
         child, 
         child_cant, 
         dob, 
-        email,
+        email: email.toLowerCase(),
         housing_provider, 
         name, 
         last, 
@@ -94,12 +94,14 @@ const postUsers = async (req, res = response) => {
 
 const putUsers = async (req, res = response) => {
     const { id } = req.params;
-    const { _id, password, ...body } = req.body;
+    const { _id, password, email, ...body } = req.body;
 
     if( password ){
         const salt = bcrypt.genSaltSync();
         body.password = bcrypt.hashSync(password, salt);
     }
+
+    body.email = email.toLowerCase();
 
     const user = await User.findByIdAndUpdate( id, body );
 
