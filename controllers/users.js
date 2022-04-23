@@ -99,7 +99,9 @@ const putUsers = async (req, res = response) => {
     body.password = bcrypt.hashSync(password, salt);
   }
 
-  body.email = email.toLowerCase();
+  if (email) {
+    body.email = email.toLowerCase();
+  }
 
   const user = await User.findByIdAndUpdate(id, body, {
     returnOriginal: false,
