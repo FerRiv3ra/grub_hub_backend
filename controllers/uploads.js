@@ -1,11 +1,11 @@
-const { response } = require("express");
+const { response } = require('express');
 
-const cloudinary = require("cloudinary").v2;
+const cloudinary = require('cloudinary').v2;
 cloudinary.config(process.env.CLOUDINARY_URL);
 
-const { uploadFiles } = require("../helpers");
-const { validFileExt } = require("../helpers/upload-file");
-const { Event } = require("../models");
+const { uploadFiles } = require('../helpers');
+const { validFileExt } = require('../helpers/upload-file');
+const { Event } = require('../models');
 
 const uploadFile = async (req, res = response) => {
   try {
@@ -26,7 +26,7 @@ const updateImg = async (req, res) => {
 
     let model;
     switch (collection) {
-      case "events":
+      case 'events':
         model = await Event.findById(id);
         if (!model) {
           return res
@@ -36,14 +36,14 @@ const updateImg = async (req, res) => {
         break;
 
       default:
-        return res.status(500).json({ msg: "Cellection no added" });
+        return res.status(500).json({ msg: 'Cellection no added' });
     }
 
     // Clean img
     if (model.img) {
-      const nameArr = model.img.split("/");
+      const nameArr = model.img.split('/');
       const name = nameArr[nameArr.length - 1];
-      const [public_id] = name.split(".");
+      const [public_id] = name.split('.');
 
       cloudinary.uploader.destroy(public_id);
     }
@@ -55,7 +55,7 @@ const updateImg = async (req, res) => {
 
     model.save();
 
-    res.json({ model });
+    res.json(model);
   } catch (msg) {
     return res.status(400).json({ msg });
   }
