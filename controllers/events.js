@@ -1,7 +1,7 @@
-const { response } = require("express");
-const { deleteEventByID } = require("../helpers");
+const { response } = require('express');
+const { deleteEventByID } = require('../helpers');
 
-const Event = require("../models/event");
+const Event = require('../models/event');
 
 const getEvents = async (req, res = response) => {
   const { limit = 0, from = 0 } = req.query;
@@ -28,7 +28,7 @@ const getEvents = async (req, res = response) => {
 };
 
 const postEvent = async (req, res = response) => {
-  const { title, date, img = "" } = req.body;
+  const { title, date, img = '' } = req.body;
 
   const event = new Event({ title, date, img });
 
@@ -45,7 +45,9 @@ const putEvent = async (req, res = response) => {
   const { id } = req.params;
 
   try {
-    const event = await Event.findByIdAndUpdate(id, body);
+    const event = await Event.findByIdAndUpdate(id, body, {
+      returnOriginal: false,
+    });
     res.json(event);
   } catch (error) {
     console.log(error);
