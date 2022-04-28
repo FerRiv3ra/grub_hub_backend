@@ -11,7 +11,8 @@ const getEvents = async (req, res = response) => {
     const [events, pastEvents] = await Promise.all([
       Event.find({ date: { $gte: today } })
         .skip(Number(from))
-        .limit(Number(limit)),
+        .limit(Number(limit))
+        .sort({ date: 1 }),
       Event.find({ date: { $lte: today } })
         .skip(Number(from))
         .limit(Number(limit)),
