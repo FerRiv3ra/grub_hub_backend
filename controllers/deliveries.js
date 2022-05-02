@@ -1,4 +1,4 @@
-const {unlinkSync} = require('fs');
+const { unlinkSync } = require('fs');
 const { response } = require('express');
 const createPDF = require('../helpers/createPDF');
 const nodemailer = require('nodemailer');
@@ -9,25 +9,24 @@ const User = require('../models/user');
 const emailHTML = require('../helpers/html-email');
 
 const createDelivery = async (req, res = response) => {
-  const { amount, customer_id, uid, cant_toiletries } = req.body;
+  const { customer_id, uid, cant_toiletries } = req.body;
 
   const date = Date.now();
 
   const startDate = initialDate();
 
   const data = {
-    amount,
     customer_id,
     user: req.user._id,
     date,
-    startDate
-  }
+    startDate,
+  };
 
   const existDelivery = await Delivery.find({ customer_id, startDate });
 
   if (existDelivery[0]) {
     return res.status(401).json({
-      msg: 'This customer ID is alredy used this week'
+      msg: 'This customer ID is alredy used this week',
     });
   }
 
@@ -44,27 +43,24 @@ const createDelivery = async (req, res = response) => {
     blocked = true;
   }
 
-  toiletries = toiletries - cant_toiletries
+  toiletries = toiletries - cant_toiletries;
 
-  await User.findByIdAndUpdate(uid, { visits, last, toiletries, blocked })
+  await User.findByIdAndUpdate(uid, { visits, last, toiletries, blocked });
 
   const delivery = new Delivery(data);
 
   await delivery.save();
 
   res.status(201).json(delivery);
-}
+};
 
 const getAllDeliveries = async (req, res = response) => {
   const today = new Date();
-  const {
-    startDate = '01/01/2022',
-    finalDate = today
-  } = req.query;
+  const { startDate = '01/01/2022', finalDate = today } = req.query;
   let final;
 
   const start = converToDate(startDate);
-  if (typeof (finalDate) === 'string') {
+  if (typeof finalDate === 'string') {
     final = converToDate(finalDate, 'final');
   } else {
     final = finalDate;
@@ -72,7 +68,7 @@ const getAllDeliveries = async (req, res = response) => {
 
   if (start > today || start > final) {
     return res.status(400).json({
-      msg: 'The dates are not valid'
+      msg: 'The dates are not valid',
     });
   }
 
@@ -83,14 +79,14 @@ const getAllDeliveries = async (req, res = response) => {
   const deliveries = await Delivery.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
-      { state: true }
-    ]
+      { state: true },
+    ],
   });
 
   if (!deliveries) {
     return res.status(204).json({
-      msg: 'Nothing to show'
-    })
+      msg: 'Nothing to show',
+    });
   }
 
   const users = await User.find();
@@ -99,30 +95,29 @@ const getAllDeliveries = async (req, res = response) => {
     for (const user of users) {
       if (user.customer_id === del.customer_id) {
         user.visits = 0;
-        return user
+        return user;
       }
     }
   });
 
-  const usersArr = usersData.reduce((temp, user) => {
-    temp[user.customer_id] = user;
-    temp[user.customer_id].visits += 1;
-    return temp;
-  }, []).filter((temp) => temp !== null);
+  const usersArr = usersData
+    .reduce((temp, user) => {
+      temp[user.customer_id] = user;
+      temp[user.customer_id].visits += 1;
+      return temp;
+    }, [])
+    .filter((temp) => temp !== null);
 
-  res.json({ deliveries, usersArr })
-}
+  res.json({ deliveries, usersArr });
+};
 
 const sendEmail = async (req, res = response) => {
   const today = new Date();
-  const {
-    startDate = '01/01/2022',
-    finalDate = today,
-  } = req.body;
+  const { startDate = '01/01/2022', finalDate = today } = req.body;
   let final;
 
   const start = converToDate(startDate);
-  if (typeof (finalDate) === 'string') {
+  if (typeof finalDate === 'string') {
     final = converToDate(finalDate, 'final');
   } else {
     final = finalDate;
@@ -130,7 +125,7 @@ const sendEmail = async (req, res = response) => {
 
   if (start > today || start > final) {
     return res.status(400).json({
-      msg: 'The dates are not valid'
+      msg: 'The dates are not valid',
     });
   }
 
@@ -141,14 +136,14 @@ const sendEmail = async (req, res = response) => {
   const data = await Delivery.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
-      { state: true }
-    ]
+      { state: true },
+    ],
   });
 
   if (!data) {
     return res.status(204).json({
-      msg: 'Nothing to show'
-    })
+      msg: 'Nothing to show',
+    });
   }
 
   const users = await User.find();
@@ -159,16 +154,18 @@ const sendEmail = async (req, res = response) => {
     for (const user of users) {
       if (user.customer_id === del.customer_id) {
         user.visits = 0;
-        return user
+        return user;
       }
     }
   });
 
-  const usersArr = usersData.reduce((temp, user) => {
-    temp[user.customer_id] = user;
-    temp[user.customer_id].visits += 1;
-    return temp;
-  }, []).filter((temp) => temp !== null);
+  const usersArr = usersData
+    .reduce((temp, user) => {
+      temp[user.customer_id] = user;
+      temp[user.customer_id].visits += 1;
+      return temp;
+    }, [])
+    .filter((temp) => temp !== null);
 
   const email = req.user.email;
 
@@ -176,41 +173,51 @@ const sendEmail = async (req, res = response) => {
     return tot + item.no_household;
   }, 0);
 
-  const response = await createPDF(start, final, usersArr, visits, totalHousehold);
+  const response = await createPDF(
+    start,
+    final,
+    usersArr,
+    visits,
+    totalHousehold
+  );
 
-  if(response.msg === 'OK'){
+  if (response.msg === 'OK') {
     try {
       const transport = nodemailer.createTransport({
         host: process.env.HOST_EMAIL,
         port: process.env.PORT_EMAIL,
         auth: {
           user: process.env.USER_EMAIL,
-          pass: process.env.PASS_EMAIL
-        }
+          pass: process.env.PASS_EMAIL,
+        },
       });
-  
+
       await transport.sendMail({
         from: '"No-Reply The Vine Centre" <no-reply@thevinecentre.org>',
         to: email,
-        subject: `Report ${start.toISOString().slice(0, 10)} - ${final.toISOString().slice(0, 10)}`, // Subject line
+        subject: `Report ${start.toISOString().slice(0, 10)} - ${final
+          .toISOString()
+          .slice(0, 10)}`, // Subject line
         html: emailHTML,
-        attachments: [{
-          filename: `report${final.toISOString().slice(0, 10)}.pdf`,
-          path: `./PDFs/report${final.toISOString().slice(0, 10)}.pdf`,
-          contentType: 'application/pdf'
-        }]
+        attachments: [
+          {
+            filename: `report${final.toISOString().slice(0, 10)}.pdf`,
+            path: `./PDFs/report${final.toISOString().slice(0, 10)}.pdf`,
+            contentType: 'application/pdf',
+          },
+        ],
       });
-  
+
       unlinkSync(`./PDFs/report${final.toISOString().slice(0, 10)}.pdf`);
-      
-      return res.json({msg: `Email sent to ${email}`});
+
+      return res.json({ msg: `Email sent to ${email}` });
     } catch (error) {
-      return res.status(400).json({error: 'Invalid email'});
+      return res.status(400).json({ error: 'Invalid email' });
     }
-  }else{
+  } else {
     return res.status(408).json(response);
   }
-}
+};
 
 const getDelivery = async (req, res = response) => {
   const { id } = req.params;
@@ -220,14 +227,14 @@ const getDelivery = async (req, res = response) => {
 
   if (delivery.length !== 0) {
     return res.status(401).json({
-      error: 'This customer ID is alredy used this week'
+      error: 'This customer ID is alredy used this week',
     });
   }
 
   res.status(200).json({
-    msg: 'OK'
+    msg: 'OK',
   });
-}
+};
 
 const putDelivery = async (req, res = response) => {
   const { id } = req.params;
@@ -236,7 +243,7 @@ const putDelivery = async (req, res = response) => {
   const delivery = await Delivery.findByIdAndUpdate(id, body);
 
   res.json(delivery);
-}
+};
 
 const deleteDelivery = async (req, res = response) => {
   const { id } = req.params;
@@ -244,7 +251,7 @@ const deleteDelivery = async (req, res = response) => {
   const delivery = await Delivery.findByIdAndUpdate(id, { state: false });
 
   res.json(delivery);
-}
+};
 
 module.exports = {
   createDelivery,
@@ -252,5 +259,5 @@ module.exports = {
   getDelivery,
   putDelivery,
   deleteDelivery,
-  sendEmail
-}
+  sendEmail,
+};
