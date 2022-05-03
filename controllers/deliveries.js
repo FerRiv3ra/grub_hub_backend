@@ -7,6 +7,7 @@ const { initialDate, converToDate } = require('../helpers/get-dates');
 const Delivery = require('../models/delivery');
 const User = require('../models/user');
 const emailHTML = require('../helpers/html-email');
+const createXLSX = require('../helpers/createXLSX');
 
 const createDelivery = async (req, res = response) => {
   const { customer_id, uid, cant_toiletries } = req.body;
@@ -181,7 +182,15 @@ const sendEmail = async (req, res = response) => {
     totalHousehold
   );
 
-  if (response.msg === 'OK') {
+  const excel = await createXLSX(
+    start,
+    final,
+    usersArr,
+    visits,
+    totalHousehold
+  );
+
+  if (response.msg === 'OK' && excel.msg === 'OK') {
     try {
       const transport = nodemailer.createTransport({
         host: process.env.HOST_EMAIL,
@@ -202,13 +211,20 @@ const sendEmail = async (req, res = response) => {
         attachments: [
           {
             filename: `report${final.toISOString().slice(0, 10)}.pdf`,
-            path: `./PDFs/report${final.toISOString().slice(0, 10)}.pdf`,
+            path: `./uploads/report${final.toISOString().slice(0, 10)}.pdf`,
             contentType: 'application/pdf',
+          },
+          {
+            filename: `report${final.toISOString().slice(0, 10)}.xlsx`,
+            path: `./uploads/report${final.toISOString().slice(0, 10)}.xlsx`,
+            contentType:
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           },
         ],
       });
 
-      unlinkSync(`./PDFs/report${final.toISOString().slice(0, 10)}.pdf`);
+      unlinkSync(`./uploads/report${final.toISOString().slice(0, 10)}.pdf`);
+      unlinkSync(`./uploads/report${final.toISOString().slice(0, 10)}.xlsx`);
 
       return res.json({ msg: `Email sent to ${email}` });
     } catch (error) {
