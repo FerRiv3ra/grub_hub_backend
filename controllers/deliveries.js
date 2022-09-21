@@ -4,26 +4,26 @@ const createPDF = require('../helpers/createPDF');
 const nodemailer = require('nodemailer');
 
 const { initialDate, converToDate } = require('../helpers/get-dates');
-const Delivery = require('../models/delivery');
+const Visit = require('../models/Visit');
 const User = require('../models/user');
 const emailHTML = require('../helpers/html-email');
 const createXLSX = require('../helpers/createXLSX');
+const moment = require('moment');
 
 const createDelivery = async (req, res = response) => {
-  const { customer_id, uid, cant_toiletries } = req.body;
+  const { customerId, uid } = req.body;
 
-  const date = Date.now();
+  const date = moment();
 
   const startDate = initialDate();
 
   const data = {
-    customer_id,
-    user: req.user._id,
+    customerId,
     date,
     startDate,
   };
 
-  const existDelivery = await Delivery.find({ customer_id, startDate });
+  const existDelivery = await Visit.find({ customerId, startDate });
 
   if (existDelivery[0]) {
     return res.status(401).json({
@@ -33,22 +33,19 @@ const createDelivery = async (req, res = response) => {
 
   const user = await User.findById(uid);
 
-  let { visits, toiletries } = user;
+  let { visits } = user;
   visits = visits + 1;
 
-  let [a, m, d] = new Date().toISOString().slice(0, 10).split('-');
-  last = `${d}/${m}/${a}`;
+  const last = moment().format('DD/MM/YYYY');
 
   let blocked = false;
   if (visits % 4 === 0) {
     blocked = true;
   }
 
-  toiletries = toiletries - cant_toiletries;
+  await User.findByIdAndUpdate(uid, { visits, last, blocked });
 
-  await User.findByIdAndUpdate(uid, { visits, last, toiletries, blocked });
-
-  const delivery = new Delivery(data);
+  const delivery = new Visit(data);
 
   await delivery.save();
 
@@ -57,7 +54,7 @@ const createDelivery = async (req, res = response) => {
 
 const getAllDeliveries = async (req, res = response) => {
   const today = new Date();
-  const { startDate = '01/01/2022', finalDate = today } = req.query;
+  const { startDate = '01/09/2022', finalDate = today } = req.query;
   let final;
 
   const start = converToDate(startDate);
@@ -77,7 +74,7 @@ const getAllDeliveries = async (req, res = response) => {
     final = today;
   }
 
-  const deliveries = await Delivery.find({
+  const deliveries = await Visit.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
       { state: true },
@@ -94,7 +91,7 @@ const getAllDeliveries = async (req, res = response) => {
 
   const usersData = deliveries.map((del) => {
     for (const user of users) {
-      if (user.customer_id === del.customer_id) {
+      if (user.customerId === del.customerId) {
         user.visits = 0;
         return user;
       }
@@ -103,8 +100,8 @@ const getAllDeliveries = async (req, res = response) => {
 
   const usersArr = usersData
     .reduce((temp, user) => {
-      temp[user.customer_id] = user;
-      temp[user.customer_id].visits += 1;
+      temp[user.customerId] = user;
+      temp[user.customerId].visits += 1;
       return temp;
     }, [])
     .filter((temp) => temp !== null);
@@ -134,7 +131,7 @@ const sendEmail = async (req, res = response) => {
     final = today;
   }
 
-  const data = await Delivery.find({
+  const data = await Visit.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
       { state: true },
@@ -153,7 +150,7 @@ const sendEmail = async (req, res = response) => {
 
   const usersData = data.map((del) => {
     for (const user of users) {
-      if (user.customer_id === del.customer_id) {
+      if (user.customerId === del.customerId) {
         user.visits = 0;
         return user;
       }
@@ -162,8 +159,8 @@ const sendEmail = async (req, res = response) => {
 
   const usersArr = usersData
     .reduce((temp, user) => {
-      temp[user.customer_id] = user;
-      temp[user.customer_id].visits += 1;
+      temp[user.customerId] = user;
+      temp[user.customerId].visits += 1;
       return temp;
     }, [])
     .filter((temp) => temp !== null);
@@ -171,7 +168,7 @@ const sendEmail = async (req, res = response) => {
   const email = req.user.email;
 
   const totalHousehold = usersArr.reduce((tot, item) => {
-    return tot + item.no_household;
+    return tot + item.noHousehold;
   }, 0);
 
   const response = await createPDF(
@@ -202,7 +199,7 @@ const sendEmail = async (req, res = response) => {
       });
 
       await transport.sendMail({
-        from: '"No-Reply The Vine Centre" <no-reply@thevinecentre.org>',
+        from: '"No-Reply The Vine Centre" <no-reply@thevinecentre.org.uk>',
         to: email,
         subject: `Report ${start.toISOString().slice(0, 10)} - ${final
           .toISOString()
@@ -239,7 +236,7 @@ const getDelivery = async (req, res = response) => {
   const { id } = req.params;
   const startDate = initialDate();
 
-  const delivery = await Delivery.find({ customer_id: id, startDate });
+  const delivery = await Visit.find({ customerId: id, startDate });
 
   if (delivery.length !== 0) {
     return res.status(401).json({
@@ -256,7 +253,7 @@ const putDelivery = async (req, res = response) => {
   const { id } = req.params;
   const { _id, ...body } = req.body;
 
-  const delivery = await Delivery.findByIdAndUpdate(id, body);
+  const delivery = await Visit.findByIdAndUpdate(id, body);
 
   res.json(delivery);
 };
@@ -264,7 +261,7 @@ const putDelivery = async (req, res = response) => {
 const deleteDelivery = async (req, res = response) => {
   const { id } = req.params;
 
-  const delivery = await Delivery.findByIdAndUpdate(id, { state: false });
+  const delivery = await Visit.findByIdAndUpdate(id, { state: false });
 
   res.json(delivery);
 };

@@ -1,8 +1,9 @@
-const { response } = require("express");
-const bcryptjs = require("bcryptjs");
+const { response } = require('express');
+const bcryptjs = require('bcryptjs');
 
-const User = require("../models/user");
-const { generateJWT } = require("../helpers/generate-jwt");
+const User = require('../models/user');
+const { generateJWT } = require('../helpers/generate-jwt');
+const Admin = require('../models/Admin');
 
 const login = async (req, res = response) => {
   const { password } = req.body;
@@ -12,17 +13,18 @@ const login = async (req, res = response) => {
 
   try {
     //Verify if user exists
-    const user = await User.findOne({ email });
+    const user = await Admin.findOne({ email });
     if (!user) {
       return res.status(400).json({
-        msg: "User does not exist",
+        ok: false,
+        msg: 'User does not exist',
       });
     }
 
     //Verify user state
     if (!user.state) {
       return res.status(400).json({
-        msg: "User does not exist",
+        msg: 'User does not exist',
       });
     }
 
@@ -30,7 +32,7 @@ const login = async (req, res = response) => {
     const validPass = bcryptjs.compareSync(password, user.password);
     if (!validPass) {
       return res.status(400).json({
-        msg: "User o password no valid",
+        msg: 'User o password no valid',
       });
     }
 
@@ -43,7 +45,7 @@ const login = async (req, res = response) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msg: "Talk to the administrator",
+      msg: 'Talk to the administrator',
     });
   }
 };
@@ -55,27 +57,27 @@ const loginByToken = (req, res) => {
 };
 
 const loginUser = async (req, res = response) => {
-  const { customer_id, dob } = req.body;
+  const { customerId, dob } = req.body;
 
   try {
-    const user = await User.findOne({ customer_id });
+    const user = await User.findOne({ customerId });
 
     if (!user) {
       return res.status(400).json({
-        msg: "User does not exist",
+        msg: 'User does not exist',
       });
     }
 
     //Verify user state
     if (!user.state) {
       return res.status(400).json({
-        msg: "User does not exist",
+        msg: 'User does not exist',
       });
     }
 
     if (user.dob !== dob) {
       return res.status(400).json({
-        msg: "Customer ID o date of birth no valid",
+        msg: 'Customer ID o date of birth no valid',
       });
     }
 
@@ -85,7 +87,7 @@ const loginUser = async (req, res = response) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msg: "Talk to the administrator",
+      msg: 'Talk to the administrator',
     });
   }
 };

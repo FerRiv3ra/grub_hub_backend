@@ -9,7 +9,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
           customer_id,
           housing_provider,
           name,
-          no_household,
+          noHousehold,
           postcode,
           visits,
         } = user;
@@ -18,7 +18,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
           customer_id,
           housing_provider,
           name,
-          no_household,
+          noHousehold,
           postcode,
           visits,
         };
@@ -30,7 +30,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
         housing_provider: '',
         postcode: '',
         visits,
-        no_household: totalHousehold,
+        noHousehold: totalHousehold,
       });
 
       const workbook = new ExcelJS.Workbook();
@@ -45,7 +45,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
         { header: 'Full Name', key: 'name', width: 24 },
         { header: 'Postcode', key: 'postcode', width: 10 },
         { header: 'Housing Provider', key: 'housing_provider', width: 20 },
-        { header: 'Number in Household', key: 'no_household', width: 18 },
+        { header: 'Number in Household', key: 'noHousehold', width: 18 },
         { header: 'Number of Visits ', key: 'visits', width: 15 },
       ];
 

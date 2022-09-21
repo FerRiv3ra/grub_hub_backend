@@ -1,11 +1,9 @@
-const Delivery = require("./delivery");
-const Event = require("./event");
-const Role = require("./role");
-const User = require("./user");
+const Visit = require('./Visit');
+const Event = require('./event');
+const User = require('./user');
 
 module.exports = {
-  Delivery,
+  Visit,
   Event,
-  Role,
   User,
 };

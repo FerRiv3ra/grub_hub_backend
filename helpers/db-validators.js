@@ -1,17 +1,10 @@
-const Delivery = require("../models/delivery");
-const Role = require("../models/role");
-const User = require("../models/user");
-const Event = require("../models/event");
+const Visit = require('../models/Visit');
+const User = require('../models/user');
+const Event = require('../models/event');
+const Admin = require('../models/Admin');
 
-const validRole = async (role = "") => {
-  const roleExist = await Role.findOne({ role });
-  if (!roleExist) {
-    throw new Error(`${role} is not a valid role`);
-  }
-};
-
-const validEmail = async (email = "") => {
-  if (email !== "") {
+const validEmail = async (email = '') => {
+  if (email !== '') {
     const emailExists = await User.findOne({ email });
     if (emailExists) {
       throw new Error(`${email} already registered`);
@@ -26,10 +19,17 @@ const validUser = async (id) => {
   }
 };
 
-const validDelivery = async (id) => {
-  const existDelivery = await Delivery.findById(id);
-  if (!existDelivery) {
-    throw new Error(`There are not delivery with ID ${id}`);
+const validAdmin = async (id) => {
+  const existUser = await Admin.findById(id);
+  if (!existUser || !existUser.state) {
+    throw new Error(`There are not user with ID ${id}`);
+  }
+};
+
+const validVisit = async (id) => {
+  const existVisit = await Visit.findById(id);
+  if (!existVisit) {
+    throw new Error(`There are not visit with ID ${id}`);
   }
 };
 
@@ -40,7 +40,7 @@ const validEvent = async (id) => {
   }
 };
 
-const validColection = (collection = "", collections = []) => {
+const validColection = (collection = '', collections = []) => {
   if (!collections.includes(collection)) {
     throw new Error(`${collection} is not valid`);
   }
@@ -49,10 +49,10 @@ const validColection = (collection = "", collections = []) => {
 };
 
 module.exports = {
-  validRole,
   validUser,
-  validDelivery,
+  validVisit,
   validEmail,
   validEvent,
   validColection,
+  validAdmin,
 };

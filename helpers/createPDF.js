@@ -9,7 +9,7 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
           customer_id,
           housing_provider,
           name,
-          no_household,
+          noHousehold,
           postcode,
           visits,
         } = user;
@@ -18,7 +18,7 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
           customer_id,
           housing_provider,
           name,
-          no_household,
+          noHousehold,
           postcode,
           visits,
         };
@@ -30,7 +30,7 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
         housing_provider: '',
         postcode: '',
         visits,
-        no_household: totalHousehold,
+        noHousehold: totalHousehold,
       });
 
       const doc = new PDF({
@@ -111,7 +111,7 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
             align: 'center',
           },
           {
-            key: 'no_household',
+            key: 'noHousehold',
             label: 'Number in household',
             align: 'center',
           },

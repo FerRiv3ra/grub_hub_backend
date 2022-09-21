@@ -1,5 +1,5 @@
 const { response } = require('express');
-const bcrypt = require('bcryptjs');
+const moment = require('moment');
 
 const User = require('../models/user');
 
@@ -30,60 +30,42 @@ const getUser = async (req, res = response) => {
 
 const postUsers = async (req, res = response) => {
   const {
+    address = '',
     child,
     dob,
-    last = '',
-    name,
-    no_household = 1,
-    password,
-    housing_provider = '',
-    phone,
+    firstName,
+    housingProvider = '',
+    lastName,
+    noHousehold = 1,
+    pensioner,
     postcode,
-    role = 'USER_ROLE',
-    visits = 0,
+    town = '',
   } = req.body;
 
-  let { child_cant = 0, toiletries = 3, email = '' } = req.body;
+  let { childCant = 0 } = req.body;
 
-  let customer_id = await User.countDocuments({ role: 'USER_ROLE' });
-  if (role === 'ADMIN_ROLE') {
-    customer_id = 0;
-  } else {
-    customer_id += 1;
-  }
+  let customerId = await User.countDocuments();
 
-  if (email === '') {
-    email = `noemail${customer_id}@default.com`;
-  }
-
-  if (no_household - child_cant > 1) {
-    toiletries = 6;
-  }
+  customerId += 1;
 
   if (!child) {
-    child_cant = 0;
+    childCant = 0;
   }
 
   const user = new User({
-    customer_id,
+    address,
     child,
-    child_cant,
-    dob,
-    email: email.toLowerCase(),
-    housing_provider,
-    name,
-    last,
-    password,
-    phone,
-    postcode: postcode.toUpperCase(),
-    role,
-    no_household,
-    toiletries,
-    visits,
+    childCant,
+    customerId,
+    dob: moment(dob).format('DD/MM/YYYY'),
+    firstName,
+    housingProvider,
+    lastName,
+    noHousehold,
+    pensioner,
+    postcode,
+    town,
   });
-
-  const salt = bcrypt.genSaltSync();
-  user.password = bcrypt.hashSync(password, salt);
 
   await user.save();
 
@@ -92,16 +74,7 @@ const postUsers = async (req, res = response) => {
 
 const putUsers = async (req, res = response) => {
   const { id } = req.params;
-  const { _id, password, email, ...body } = req.body;
-
-  if (password) {
-    const salt = bcrypt.genSaltSync();
-    body.password = bcrypt.hashSync(password, salt);
-  }
-
-  if (email) {
-    body.email = email.toLowerCase();
-  }
+  const { _id, ...body } = req.body;
 
   const user = await User.findByIdAndUpdate(id, body, {
     returnOriginal: false,
@@ -113,7 +86,7 @@ const putUsers = async (req, res = response) => {
 const deleteUsers = async (req, res = response) => {
   const { id } = req.params;
 
-  const user = await User.findByIdAndUpdate(id, { state: false });
+  const user = await User.findByIdAndRemove(id);
 
   res.json(user);
 };

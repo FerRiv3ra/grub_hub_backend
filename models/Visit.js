@@ -1,11 +1,19 @@
 const { Schema, model } = require('mongoose');
 
-const DeliverySchema = Schema({
+const VisitSchema = Schema({
+  amount: {
+    type: Number,
+    default: 0,
+  },
   date: {
     type: Date,
     required: true,
   },
-  customer_id: {
+  donation: {
+    type: Boolean,
+    default: false,
+  },
+  customerId: {
     type: Number,
     required: [true, 'The customer ID is required'],
   },
@@ -17,11 +25,6 @@ const DeliverySchema = Schema({
     type: String,
     required: true,
   },
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
 });
 
-module.exports = model('Deliverie', DeliverySchema);
+module.exports = model('Visit', VisitSchema);

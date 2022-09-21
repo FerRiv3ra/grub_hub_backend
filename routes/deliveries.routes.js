@@ -30,8 +30,8 @@ router.post(
   '/',
   [
     validateJWT,
-    check('customer_id', 'The customer ID is required').not().isEmpty(),
-    check('customer_id', 'The customer ID have to be a number').isNumeric(),
+    check('customerId', 'The customer ID is required').not().isEmpty(),
+    check('customerId', 'The customer ID have to be a number').isNumeric(),
     check('uid', 'Customer ID no valid').not().isEmpty(),
     check('uid', 'Customer ID no valid').isMongoId(),
     validateFields,

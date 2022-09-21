@@ -1,44 +1,63 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { getUsers, postUsers, putUsers, deleteUsers, getUser } = require('../controllers/users');
-const { validRole, validUser, validEmail } = require('../helpers/db-validators');
-const { validateFields, validateJWT, isAdminRole } = require('../middlewares');
+const {
+  getUsers,
+  postUsers,
+  putUsers,
+  deleteUsers,
+  getUser,
+} = require('../controllers/users');
+const { validUser } = require('../helpers/db-validators');
+const { validateFields, validateJWT } = require('../middlewares');
 
 const router = Router();
 
 router.get('/', getUsers);
 
-router.get('/:id',[
+router.get(
+  '/:id',
+  [
     check('id', 'Is not a valid ID').isMongoId(),
-    check('id').custom( validUser ),
-    validateFields
-], getUser);
+    check('id').custom(validUser),
+    validateFields,
+  ],
+  getUser
+);
 
-router.post('/', [
-    check('name', 'The name cannot be empty').not().isEmpty(),
-    check('password', 'Min password is 6 chars').isLength({min: 6}),
+router.post(
+  '/',
+  [
+    check('address', 'The address cannot be empty').not().isEmpty(),
+    check('firstName', 'The first name cannot be empty').not().isEmpty(),
+    check('lastName', 'The last name cannot be empty').not().isEmpty(),
     check('postcode', 'Is not valid postcode').isPostalCode('GB'),
     check('dob', 'Date of birth is required').not().isEmpty(),
-    check('dob', 'Date of birth is not valid').isDate({format: 'DD-MM-YYYY'}),
-    check('role').custom( validRole ),
-    check('email').custom( validEmail ),
-    validateFields
-] , postUsers);
+    check('dob', 'Date of birth is not valid').isDate({ format: 'DD/MM/YYYY' }),
+    validateFields,
+  ],
+  postUsers
+);
 
-router.put('/:id', [
+router.put(
+  '/:id',
+  [
     check('id', 'Is not a valid ID').isMongoId(),
-    check('id').custom( validUser ),
-    check('role').custom( validRole ),
-    validateFields
-] , putUsers);
+    check('id').custom(validUser),
+    validateFields,
+  ],
+  putUsers
+);
 
-router.delete('/:id', [
+router.delete(
+  '/:id',
+  [
     validateJWT,
-    isAdminRole,
     check('id', 'Is not a valid ID').isMongoId(),
-    check('id').custom( validUser ),
-    validateFields
-] , deleteUsers);
+    check('id').custom(validUser),
+    validateFields,
+  ],
+  deleteUsers
+);
 
 module.exports = router;
