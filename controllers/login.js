@@ -4,7 +4,8 @@ const bcryptjs = require('bcryptjs');
 const User = require('../models/user');
 const { generateJWT } = require('../helpers/generate-jwt');
 const Admin = require('../models/Admin');
-const moment = require('moment');
+const sendEmail = require('../helpers/sendEmail');
+const generateID = require('../helpers/generateID');
 
 const login = async (req, res = response) => {
   const { password } = req.body;
@@ -37,17 +38,39 @@ const login = async (req, res = response) => {
       });
     }
 
-    const token = await generateJWT(user.id);
+    const token = generateID();
+    user.token = token;
+    await user.save();
 
-    res.json({
-      user,
-      token,
-    });
+    const resp = await sendEmail(email, user.firstName, token);
+
+    res.json({ ok: true, msg: resp.msg });
   } catch (error) {
     console.log(error);
     res.status(500).json({
       msg: 'Talk to the administrator',
     });
+  }
+};
+
+const confirmTokenLongin = async (req, res = response) => {
+  const { id } = req.params;
+
+  try {
+    const user = await Admin.findOne({ token: id });
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid token', ok: false });
+    }
+
+    user.token = '';
+    await user.save();
+
+    const token = await generateJWT(user.id);
+
+    res.json({ ok: true, user, token });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -88,4 +111,5 @@ module.exports = {
   login,
   loginUser,
   loginByToken,
+  confirmTokenLongin,
 };

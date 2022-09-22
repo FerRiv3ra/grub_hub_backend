@@ -1,6 +1,11 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { login, loginUser, loginByToken } = require('../controllers/login');
+const {
+  login,
+  loginUser,
+  loginByToken,
+  confirmTokenLongin,
+} = require('../controllers/login');
 const { validateDOB } = require('../middlewares/infoValidators');
 const { validateFields } = require('../middlewares/validate-fields');
 const { validateJWT } = require('../middlewares/validate-jwt');
@@ -17,6 +22,8 @@ router.post(
   ],
   login
 );
+
+router.get('/login/:id', confirmTokenLongin);
 
 router.get('/login', validateJWT, loginByToken);
 
