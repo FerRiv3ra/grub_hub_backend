@@ -9,7 +9,7 @@ const {
   getUser,
 } = require('../controllers/users');
 const { validUser } = require('../helpers/db-validators');
-const { validateFields, validateJWT } = require('../middlewares');
+const { validateFields, validateJWT, validateDOB } = require('../middlewares');
 
 const router = Router();
 
@@ -33,7 +33,8 @@ router.post(
     check('lastName', 'The last name cannot be empty').not().isEmpty(),
     check('postcode', 'Is not valid postcode').isPostalCode('GB'),
     check('dob', 'Date of birth is required').not().isEmpty(),
-    check('dob', 'Date of birth is not valid').isDate({ format: 'DD/MM/YYYY' }),
+    check('phone', 'Phone is required').not().isEmpty(),
+    validateDOB,
     validateFields,
   ],
   postUsers

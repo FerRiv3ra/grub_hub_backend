@@ -10,7 +10,7 @@ class Server {
 
     this.paths = {
       adminsPath: '/api/admins',
-      deliveries: '/api/deliveries',
+      deliveries: '/api/visits',
       eventsPath: '/api/events',
       uploadPath: '/api/upload',
       usersLogin: '/api/auth',

@@ -11,21 +11,22 @@ const createXLSX = require('../helpers/createXLSX');
 const moment = require('moment');
 
 const createDelivery = async (req, res = response) => {
-  const { customerId, uid } = req.body;
+  const { customerId, uid, amount = 0 } = req.body;
 
   const date = moment();
 
   const startDate = initialDate();
 
   const data = {
+    amount,
     customerId,
     date,
     startDate,
   };
 
-  const existDelivery = await Visit.find({ customerId, startDate });
+  const existsVisit = await Visit.find({ customerId, startDate });
 
-  if (existDelivery[0]) {
+  if (existsVisit[0]) {
     return res.status(401).json({
       msg: 'This customer ID is alredy used this week',
     });
@@ -33,23 +34,20 @@ const createDelivery = async (req, res = response) => {
 
   const user = await User.findById(uid);
 
-  let { visits } = user;
-  visits = visits + 1;
+  user.visits = user.visits + 1;
+  user.lastVisit = moment().format('DD/MM/YYYY');
 
-  const last = moment().format('DD/MM/YYYY');
-
-  let blocked = false;
-  if (visits % 4 === 0) {
-    blocked = true;
+  if (user.visits % 4 === 0) {
+    user.blocked = true;
   }
 
-  await User.findByIdAndUpdate(uid, { visits, last, blocked });
+  await user.save();
 
-  const delivery = new Visit(data);
+  const visit = new Visit(data);
 
-  await delivery.save();
+  await visit.save();
 
-  res.status(201).json(delivery);
+  res.status(201).json({ ok: true, visit });
 };
 
 const getAllDeliveries = async (req, res = response) => {
@@ -74,14 +72,14 @@ const getAllDeliveries = async (req, res = response) => {
     final = today;
   }
 
-  const deliveries = await Visit.find({
+  const visits = await Visit.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
       { state: true },
     ],
   });
 
-  if (!deliveries) {
+  if (!visits) {
     return res.status(204).json({
       msg: 'Nothing to show',
     });
@@ -89,7 +87,7 @@ const getAllDeliveries = async (req, res = response) => {
 
   const users = await User.find();
 
-  const usersData = deliveries.map((del) => {
+  const usersData = visits.map((del) => {
     for (const user of users) {
       if (user.customerId === del.customerId) {
         user.visits = 0;
@@ -106,12 +104,12 @@ const getAllDeliveries = async (req, res = response) => {
     }, [])
     .filter((temp) => temp !== null);
 
-  res.json({ deliveries, usersArr });
+  res.json({ visits, usersArr });
 };
 
 const sendEmail = async (req, res = response) => {
   const today = new Date();
-  const { startDate = '01/01/2022', finalDate = today } = req.body;
+  const { startDate = '01/09/2022', finalDate = today } = req.body;
   let final;
 
   const start = converToDate(startDate);
@@ -131,14 +129,14 @@ const sendEmail = async (req, res = response) => {
     final = today;
   }
 
-  const data = await Visit.find({
+  const visits = await Visit.find({
     $and: [
       { date: { $gte: new Date(start), $lte: new Date(final) } },
       { state: true },
     ],
   });
 
-  if (!data) {
+  if (!visits) {
     return res.status(204).json({
       msg: 'Nothing to show',
     });
@@ -146,11 +144,9 @@ const sendEmail = async (req, res = response) => {
 
   const users = await User.find();
 
-  const visits = data.length;
-
-  const usersData = data.map((del) => {
+  const usersData = visits.map((visit) => {
     for (const user of users) {
-      if (user.customerId === del.customerId) {
+      if (user.customerId === visit.customerId) {
         user.visits = 0;
         return user;
       }
@@ -179,15 +175,9 @@ const sendEmail = async (req, res = response) => {
     totalHousehold
   );
 
-  const excel = await createXLSX(
-    start,
-    final,
-    usersArr,
-    visits,
-    totalHousehold
-  );
+  const excel = await createXLSX(final, usersArr, visits, totalHousehold);
 
-  if (response.msg === 'OK' && excel.msg === 'OK') {
+  if (response.ok && excel.ok) {
     try {
       const transport = nodemailer.createTransport({
         host: process.env.HOST_EMAIL,
@@ -245,7 +235,7 @@ const getDelivery = async (req, res = response) => {
   }
 
   res.status(200).json({
-    msg: 'OK',
+    ok: true,
   });
 };
 

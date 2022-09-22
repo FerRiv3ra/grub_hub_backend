@@ -1,5 +1,4 @@
 const { response } = require('express');
-const moment = require('moment');
 
 const User = require('../models/user');
 
@@ -38,6 +37,7 @@ const postUsers = async (req, res = response) => {
     lastName,
     noHousehold = 1,
     pensioner,
+    phone,
     postcode,
     town = '',
   } = req.body;
@@ -57,12 +57,13 @@ const postUsers = async (req, res = response) => {
     child,
     childCant,
     customerId,
-    dob: moment(dob).format('DD/MM/YYYY'),
+    dob,
     firstName,
     housingProvider,
     lastName,
     noHousehold,
     pensioner,
+    phone,
     postcode,
     town,
   });

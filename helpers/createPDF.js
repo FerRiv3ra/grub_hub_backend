@@ -3,39 +3,42 @@ const fs = require('fs');
 
 const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
   return new Promise((res, rej) => {
+    const totalDonations = visits.reduce((total, visit) => {
+      total += visit.amount;
+
+      return total;
+    }, 0);
     try {
       const users = usersArr.map((user, index) => {
-        const {
-          customer_id,
-          housing_provider,
-          name,
-          noHousehold,
-          postcode,
-          visits,
-        } = user;
+        const amount = visits.reduce((total, visit) => {
+          if (visit.customerId === user.customerId) {
+            total += visit.amount;
+          }
+
+          return total;
+        }, 0);
+
         return {
           index: index + 1,
-          customer_id,
-          housing_provider,
-          name,
-          noHousehold,
-          postcode,
-          visits,
+          ...user._doc,
+          amount: `£ ${amount}`,
         };
       });
 
       users.push({
         index: '',
-        name: 'Total',
-        housing_provider: '',
+        amount: `£ ${totalDonations}`,
+        firstName: 'Total',
+        lastName: '',
+        housingProvider: '',
         postcode: '',
-        visits,
+        visits: visits.length,
         noHousehold: totalHousehold,
       });
 
       const doc = new PDF({
         size: 'LETTER',
-        margins: { top: 20, left: 25, right: 25, bottom: 20 },
+        margins: { top: 20, left: 20, right: 20, bottom: 20 },
         bufferPages: true,
       });
 
@@ -103,19 +106,25 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
       doc.addTable(
         [
           { key: 'index', label: 'Index', align: 'center' },
-          { key: 'name', label: 'Name', align: 'left' },
+          { key: 'firstName', label: 'First Name', align: 'left' },
+          { key: 'lastName', label: 'Last Name', align: 'left' },
           { key: 'postcode', label: 'Postcode', align: 'center' },
           {
-            key: 'housing_provider',
+            key: 'housingProvider',
             label: 'Housing Provider',
             align: 'center',
           },
           {
             key: 'noHousehold',
-            label: 'Number in household',
+            label: 'No in household',
             align: 'center',
           },
-          { key: 'visits', label: 'Total visits', align: 'center' },
+          {
+            key: 'amount',
+            label: 'Donations',
+            align: 'center',
+          },
+          { key: 'visits', label: 'Visits', align: 'center' },
         ],
         users,
         {
@@ -144,7 +153,7 @@ const createPDF = (start, final, usersArr = [], visits, totalHousehold) => {
       );
       doc.end();
 
-      res({ msg: `OK` });
+      res({ ok: true });
     } catch (error) {
       rej({ error: 'Cannot create report' });
     }

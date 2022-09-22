@@ -4,6 +4,7 @@ const bcryptjs = require('bcryptjs');
 const User = require('../models/user');
 const { generateJWT } = require('../helpers/generate-jwt');
 const Admin = require('../models/Admin');
+const moment = require('moment');
 
 const login = async (req, res = response) => {
   const { password } = req.body;
@@ -68,22 +69,13 @@ const loginUser = async (req, res = response) => {
       });
     }
 
-    //Verify user state
-    if (!user.state) {
-      return res.status(400).json({
-        msg: 'User does not exist',
-      });
-    }
-
-    if (user.dob !== dob) {
+    if (dob !== user.dob) {
       return res.status(400).json({
         msg: 'Customer ID o date of birth no valid',
       });
     }
 
-    res.json({
-      user,
-    });
+    res.json({ ok: true, user });
   } catch (error) {
     console.log(error);
     res.status(500).json({

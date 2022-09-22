@@ -1,35 +1,37 @@
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 
-const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
+const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
   return new Promise((res, rej) => {
+    const totalDonations = visits.reduce((total, visit) => {
+      total += visit.amount;
+
+      return total;
+    }, 0);
     try {
       const users = usersArr.map((user, index) => {
-        const {
-          customer_id,
-          housing_provider,
-          name,
-          noHousehold,
-          postcode,
-          visits,
-        } = user;
+        const { pensioner, ...rest } = user;
+
+        const amount = visits.reduce((total, visit) => {
+          if (visit.customerId === user.customerId) {
+            total += visit.amount;
+          }
+
+          return total;
+        }, 0);
+
         return {
           index: index + 1,
-          customer_id,
-          housing_provider,
-          name,
-          noHousehold,
-          postcode,
-          visits,
+          ...rest._doc,
+          amount: `£ ${amount}`,
+          pensioner: pensioner ? 'Yes' : 'No',
         };
       });
 
       users.push({
-        index: '',
-        name: 'Total',
-        housing_provider: '',
-        postcode: '',
-        visits,
+        amount: `£ ${totalDonations}`,
+        firstName: 'Total',
+        visits: visits.length,
         noHousehold: totalHousehold,
       });
 
@@ -42,11 +44,18 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
 
       worksheet.columns = [
         { header: 'Item', key: 'index', width: 6 },
-        { header: 'Full Name', key: 'name', width: 24 },
-        { header: 'Postcode', key: 'postcode', width: 10 },
-        { header: 'Housing Provider', key: 'housing_provider', width: 20 },
+        { header: 'First Name', key: 'firstName', width: 20 },
+        { header: 'Last Name', key: 'lastName', width: 20 },
+        { header: 'Phone number', key: 'phone', width: 20 },
         { header: 'Number in Household', key: 'noHousehold', width: 18 },
-        { header: 'Number of Visits ', key: 'visits', width: 15 },
+        { header: 'Children', key: 'childCant', width: 12 },
+        { header: 'Address', key: 'address', width: 25 },
+        { header: 'Postcode', key: 'postcode', width: 10 },
+        { header: 'Town', key: 'town', width: 10 },
+        { header: 'Housing Provider', key: 'housingProvider', width: 20 },
+        { header: 'Pensioner', key: 'pensioner', width: 20 },
+        { header: 'Total donations', key: 'amount', width: 15 },
+        { header: 'Number of Visits', key: 'visits', width: 15 },
       ];
 
       worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -55,10 +64,26 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
         worksheet.addRow(user);
       });
 
-      const figureColumns = [1, 5, 6];
+      const figureColumns = [1, 5, 6, 9, 10, 11, 12, 13];
       figureColumns.forEach((i) => {
         worksheet.getColumn(i).alignment = { horizontal: 'center' };
       });
+
+      const firstColumn = [
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+      ];
 
       worksheet.eachRow({ includeEmpty: false }, function (row, rowNumber) {
         worksheet.getCell(`A${rowNumber}`).border = {
@@ -68,8 +93,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
           right: { style: 'none' },
         };
 
-        const insideColumns = ['B', 'C', 'D', 'E'];
-        insideColumns.forEach((v) => {
+        firstColumn.forEach((v) => {
           worksheet.getCell(`${v}${rowNumber}`).border = {
             top: { style: 'thin' },
             bottom: { style: 'thin' },
@@ -86,8 +110,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
         };
       });
 
-      const firstRow = ['A', 'B', 'C', 'D', 'E', 'F'];
-      firstRow.forEach((col) => {
+      firstColumn.forEach((col) => {
         worksheet.getCell(`${col}1`).fill = {
           type: 'pattern',
           pattern: 'solid',
@@ -100,7 +123,7 @@ const createXLSX = (start, final, usersArr = [], visits, totalHousehold) => {
         `./uploads/report${final.toISOString().slice(0, 10)}.xlsx`
       );
 
-      res({ msg: `OK` });
+      res({ ok: true });
     } catch (error) {
       rej({ error: 'Cannot create report' });
     }

@@ -9,10 +9,6 @@ const VisitSchema = Schema({
     type: Date,
     required: true,
   },
-  donation: {
-    type: Boolean,
-    default: false,
-  },
   customerId: {
     type: Number,
     required: [true, 'The customer ID is required'],
