@@ -23,8 +23,7 @@ const router = Router();
 router.post(
   '/',
   [
-    check('firstName', 'The first name cannot be empty').not().isEmpty(),
-    check('lastName', 'The last name cannot be empty').not().isEmpty(),
+    check('name', 'The name cannot be empty').not().isEmpty(),
     check('password', 'Is very weak password').isStrongPassword(),
     manageRole,
     validateFields,

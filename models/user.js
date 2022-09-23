@@ -55,6 +55,10 @@ const UserSchema = Schema({
     type: String,
     required: [true, 'The postcode is required'],
   },
+  state: {
+    type: Boolean,
+    default: true,
+  },
   town: {
     type: String,
     default: '',

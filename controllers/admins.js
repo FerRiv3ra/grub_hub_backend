@@ -6,14 +6,13 @@ const generateID = require('../helpers/generateID');
 const sendEmail = require('../helpers/sendEmail');
 
 const postAdmin = async (req, res = response) => {
-  const { email, firstName, lastName, password } = req.body;
+  const { email, name, password } = req.body;
 
   const salt = bcrypt.genSaltSync();
   const existsUser = await Admin.findOne({ email });
 
-  if (existsUser) {
-    existsUser.firstName = firstName;
-    existsUser.lastName = lastName;
+  if (existsUser && !existsUser.state) {
+    existsUser.name = name;
     existsUser.password = bcrypt.hashSync(password, salt);
     existsUser.state = true;
 
@@ -22,10 +21,13 @@ const postAdmin = async (req, res = response) => {
     return res.json({ ok: true, user: existsUser });
   }
 
+  if (existsUser && existsUser.state) {
+    return res.status(400).json({ ok: false, msg: 'User already registered' });
+  }
+
   const user = new Admin({
     email: email.toLowerCase(),
-    firstName,
-    lastName,
+    name,
     password,
   });
 

@@ -6,14 +6,11 @@ const AdminSchema = Schema({
     required: [true, 'Date of birth is required'],
     trim: true,
     lowercase: true,
+    unique: true,
   },
-  firstName: {
+  name: {
     type: String,
-    required: [true, 'The fisrt name is required'],
-  },
-  lastName: {
-    type: String,
-    required: [true, 'The last name is required'],
+    required: [true, 'The first name is required'],
   },
   password: {
     type: String,

@@ -14,7 +14,7 @@ const validEmail = async (email = '') => {
 
 const validUser = async (id) => {
   const existUser = await User.findById(id);
-  if (!existUser) {
+  if (!existUser || !existUser.state) {
     throw new Error(`There are not user with ID ${id}`);
   }
 };
