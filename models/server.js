@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const { dbConection } = require('../database/config');
 const fileUpload = require('express-fileupload');
 
@@ -37,6 +38,9 @@ class Server {
 
     //Read and parse body
     this.app.use(express.json());
+
+    //Activate Morgan
+    this.app.use(morgan('dev'));
 
     //Public directory
     this.app.use(express.static('public'));

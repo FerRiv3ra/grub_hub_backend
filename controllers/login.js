@@ -26,6 +26,7 @@ const login = async (req, res = response) => {
     //Verify user state
     if (!user.state) {
       return res.status(400).json({
+        ok: false,
         msg: 'User does not exist',
       });
     }
@@ -34,6 +35,7 @@ const login = async (req, res = response) => {
     const validPass = bcryptjs.compareSync(password, user.password);
     if (!validPass) {
       return res.status(400).json({
+        ok: false,
         msg: 'User o password no valid',
       });
     }
@@ -46,7 +48,6 @@ const login = async (req, res = response) => {
 
     res.json({ ok: true, msg: resp.msg });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       msg: 'Talk to the administrator',
     });

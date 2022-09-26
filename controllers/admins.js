@@ -88,12 +88,14 @@ const forgotPassword = async (req, res = response) => {
         ok: true,
       });
     } else {
-      return res.status(500).json({
-        msg: 'email no enviado, hable con el administrador',
-      });
+      return res
+        .status(500)
+        .json({ ok: false, msg: 'email no sent, talk to the administrator' });
     }
   } catch (error) {
-    console.log(error);
+    return res
+      .status(400)
+      .json({ ok: false, msg: 'email no sent, talk to the administrator' });
   }
 };
 
@@ -109,7 +111,7 @@ const confirmToken = async (req, res = response) => {
 
     res.json({ msg: 'Valid token', ok: true });
   } catch (error) {
-    console.log(error);
+    res.status(400).json({ msg: 'Invalid token', ok: false });
   }
 };
 
