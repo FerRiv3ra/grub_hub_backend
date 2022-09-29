@@ -76,7 +76,7 @@ const forgotPassword = async (req, res = response) => {
       return res.status(400).json({ msg: 'Unregistered email', ok: false });
     }
 
-    const token = generateID();
+    const token = generateID('forgot');
     user.token = token;
     await user.save();
 
@@ -101,6 +101,10 @@ const forgotPassword = async (req, res = response) => {
 
 const confirmToken = async (req, res = response) => {
   const { token } = req.params;
+
+  if (token[0] !== 'F') {
+    return res.status(400).json({ ok: false, msg: 'Invalid token' });
+  }
 
   try {
     const user = await Admin.findOne({ token });

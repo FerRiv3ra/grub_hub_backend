@@ -215,7 +215,7 @@ const sendEmail = async (req, res = response) => {
 
       return res.json({ msg: `Email sent to ${email}` });
     } catch (error) {
-      return res.status(400).json({ error: 'Invalid email' });
+      return res.status(400).json({ msg: 'Invalid email' });
     }
   } else {
     return res.status(408).json(response);
@@ -230,7 +230,7 @@ const getDelivery = async (req, res = response) => {
 
   if (delivery.length !== 0) {
     return res.status(401).json({
-      error: 'This customer ID is alredy used this week',
+      msg: 'This customer ID is alredy used this week',
     });
   }
 

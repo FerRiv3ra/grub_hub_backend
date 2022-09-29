@@ -40,7 +40,7 @@ const login = async (req, res = response) => {
       });
     }
 
-    const token = generateID();
+    const token = generateID('login');
     user.token = token;
     await user.save();
 
@@ -56,6 +56,10 @@ const login = async (req, res = response) => {
 
 const confirmTokenLongin = async (req, res = response) => {
   const { id } = req.params;
+
+  if (id[0] !== 'L') {
+    return res.status(400).json({ ok: false, msg: 'Invalid token' });
+  }
 
   try {
     const user = await Admin.findOne({ token: id });

@@ -35,7 +35,7 @@ const validateDOB = (req, res, next) => {
       .json({ msg: 'Invalid format - please follow this format (DD/MM/YYYY)' });
   }
 
-  req.body.dob = `${dob}T00:00:00+00:00`;
+  req.body.dob = `${dob}T00:00:00.000Z`;
   next();
 };
 
