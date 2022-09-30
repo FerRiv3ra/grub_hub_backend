@@ -13,6 +13,9 @@ const login = async (req, res = response) => {
 
   email = email.toLowerCase();
 
+  const test = email.includes('testapple') || email.includes('testgoogle');
+  const typeTest = test && email.includes('apple') ? 'apple' : 'google';
+
   try {
     //Verify if user exists
     const user = await Admin.findOne({ email });
@@ -40,11 +43,13 @@ const login = async (req, res = response) => {
       });
     }
 
-    const token = generateID('login');
+    const token = test ? `L${typeTest}aprvefrv` : generateID('login');
     user.token = token;
     await user.save();
 
-    const resp = await sendEmail(email, user.firstName, token);
+    const resp = test
+      ? { msg: 'Login in test mode' }
+      : await sendEmail(email, user.firstName, token);
 
     res.json({ ok: true, msg: resp.msg });
   } catch (error) {
@@ -65,6 +70,10 @@ const confirmTokenLongin = async (req, res = response) => {
     const user = await Admin.findOne({ token: id });
 
     if (!user) {
+      return res.status(400).json({ msg: 'Invalid token', ok: false });
+    }
+
+    if (!user.state) {
       return res.status(400).json({ msg: 'Invalid token', ok: false });
     }
 
