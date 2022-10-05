@@ -32,6 +32,7 @@ const postUsers = async (req, res = response) => {
     address = '',
     child,
     dob,
+    disabilities,
     firstName,
     housingProvider = '',
     lastName,
@@ -42,7 +43,7 @@ const postUsers = async (req, res = response) => {
     town = '',
   } = req.body;
 
-  let { childCant = 0 } = req.body;
+  let { childCant = 0, pensionerCant = 0 } = req.body;
 
   let customerId = await User.countDocuments();
 
@@ -52,17 +53,23 @@ const postUsers = async (req, res = response) => {
     childCant = 0;
   }
 
+  if (!pensioner) {
+    pensionerCant = 0;
+  }
+
   const user = new User({
     address,
     child,
     childCant,
     customerId,
     dob,
+    disabilities,
     firstName,
     housingProvider,
     lastName,
     noHousehold,
     pensioner,
+    pensionerCant,
     phone,
     postcode,
     town,

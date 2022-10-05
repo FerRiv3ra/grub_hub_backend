@@ -24,6 +24,10 @@ const UserSchema = Schema({
     type: String,
     required: [true, 'Date of birth is required'],
   },
+  disabilities: {
+    type: Boolean,
+    default: false,
+  },
   firstName: {
     type: String,
     required: [true, 'The fisrt name is required'],
@@ -46,6 +50,10 @@ const UserSchema = Schema({
   pensioner: {
     type: Boolean,
     default: false,
+  },
+  pensionerCant: {
+    type: Number,
+    default: 0,
   },
   phone: {
     type: String,
