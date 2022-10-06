@@ -10,7 +10,7 @@ const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
     }, 0);
     try {
       const users = usersArr.map((user, index) => {
-        const { pensioner, ...rest } = user;
+        const { pensioner, pensionerCant, disabilities, ...rest } = user;
 
         const amount = visits.reduce((total, visit) => {
           if (visit.customerId === user.customerId) {
@@ -24,7 +24,8 @@ const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
           index: index + 1,
           ...rest._doc,
           amount: `£ ${amount}`,
-          pensioner: pensioner ? 'Yes' : 'No',
+          pensioner: pensioner ? pensionerCant : 'No',
+          disabilities: disabilities ? 'Yes' : 'No',
         };
       });
 
@@ -54,6 +55,7 @@ const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
         { header: 'Town', key: 'town', width: 10 },
         { header: 'Housing Provider', key: 'housingProvider', width: 20 },
         { header: 'Pensioner', key: 'pensioner', width: 20 },
+        { header: 'Disabilities', key: 'disabilities', width: 20 },
         { header: 'Total donations', key: 'amount', width: 15 },
         { header: 'Number of Visits', key: 'visits', width: 15 },
       ];
@@ -64,7 +66,7 @@ const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
         worksheet.addRow(user);
       });
 
-      const figureColumns = [1, 5, 6, 9, 10, 11, 12, 13];
+      const figureColumns = [1, 5, 6, 9, 10, 11, 12, 13, 14];
       figureColumns.forEach((i) => {
         worksheet.getColumn(i).alignment = { horizontal: 'center' };
       });
@@ -83,6 +85,7 @@ const createXLSX = (final, usersArr = [], visits, totalHousehold) => {
         'K',
         'L',
         'M',
+        'N',
       ];
 
       worksheet.eachRow({ includeEmpty: false }, function (row, rowNumber) {
