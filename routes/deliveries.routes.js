@@ -8,7 +8,7 @@ const {
   getDelivery,
   sendEmail,
 } = require('../controllers/deliveries');
-const { validDelivery } = require('../helpers/db-validators');
+const { validVisit } = require('../helpers/db-validators');
 const { validateJWT, validateFields } = require('../middlewares');
 
 const router = Router();
@@ -45,7 +45,7 @@ router.put(
   [
     validateJWT,
     check('id', 'Is not valid ID').isMongoId(),
-    check('id').custom(validDelivery),
+    check('id').custom(validVisit),
     validateFields,
   ],
   putDelivery
@@ -56,7 +56,7 @@ router.delete(
   '/:id',
   [
     check('id', 'Is not valid ID').isMongoId(),
-    check('id').custom(validDelivery),
+    check('id').custom(validVisit),
     validateFields,
   ],
   deleteDelivery
